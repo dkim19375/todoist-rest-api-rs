@@ -9,11 +9,14 @@ use uuid::Uuid;
 
 use crate::todoist_config::TodoistConfig;
 
+pub mod models;
+pub mod paths;
+
 const TODOIST_API_URL: &str = "https://api.todoist.com/rest/v2";
 
 pub async fn send_todoist_get_request<T: DeserializeOwned>(config: &TodoistConfig, path: String) -> Result<T, RequestError> {
     send_todoist_request::<(), T>(
-        config, path, None, RequestMethod::Get, false, true,
+        config, path, None, RequestMethod::Get, false,
     ).await.map(|res| res.unwrap())
 }
 
@@ -22,16 +25,15 @@ pub async fn send_todoist_post_request<Req: Serialize + ?Sized, Res: Deserialize
     path: String,
     data: &Req,
     include_request_id: bool,
-    has_response_body: bool,
 ) -> Result<Res, RequestError> {
     send_todoist_request::<Req, Res>(
-        config, path, Some(data), RequestMethod::Post, include_request_id, has_response_body,
+        config, path, Some(data), RequestMethod::Post, include_request_id,
     ).await.map(|res| res.unwrap())
 }
 
 pub async fn send_todoist_delete_request(config: &TodoistConfig, path: String) -> Result<(), RequestError> {
     send_todoist_request::<(), ()>(
-        config, path, None, RequestMethod::Delete, false, false,
+        config, path, None, RequestMethod::Delete, false,
     ).await.map(|_| ())
 }
 
@@ -41,7 +43,6 @@ async fn send_todoist_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
     data: Option<&Req>,
     method: RequestMethod,
     include_request_id: bool,
-    has_response_body: bool,
 ) -> Result<Option<Res>, RequestError> {
     if !path.starts_with('/') {
         panic!("Path must start with a '/'! Instead was '{}'", path);
@@ -65,7 +66,7 @@ async fn send_todoist_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
             status_code: NonZeroU16::new(response.status().as_u16()).unwrap(),
         }.into());
     }
-    if !has_response_body {
+    if response.status() == 204 {
         return Ok(None);
     }
     let result: Res = response.json().await?;

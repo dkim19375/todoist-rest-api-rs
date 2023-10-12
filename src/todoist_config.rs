@@ -23,6 +23,10 @@ impl TodoistConfig {
     }
 }
 
+pub fn create_config(token: String) -> Result<TodoistConfig, TodoistConfigCreationErrors> {
+    TodoistConfig::new(token)
+}
+
 #[derive(Debug)]
 pub enum TodoistConfigCreationErrors {
     InvalidTokenFormat(InvalidTokenFormatError),
