@@ -22,6 +22,24 @@ pub struct PersonalLabel {
 }
 
 impl PersonalLabel {
+    /// Creates a new copy of this [PersonalLabel] with a new ID from the Todoist API
+    ///
+    /// This method is a shortcut for
+    /// [`todoist_rest_api::labels::create_new_personal_label(config, label.name, Some(label.order), Some(label.color), Some(label.is_favorite))`](crate::labels::create_new_personal_label)
+    pub async fn create_new_copy(
+        self,
+        config: &TodoistConfig,
+    ) -> Result<PersonalLabel, RequestError> {
+        crate::labels::create_new_personal_label(
+            config,
+            self.name,
+            Some(self.order),
+            Some(self.color),
+            Some(self.is_favorite),
+        )
+        .await
+    }
+
     /// Retrieves the updated label from the Todoist API using this label's ID.
     ///
     /// If the label no longer exists, then a [RequestError] will be returned.
