@@ -1,15 +1,21 @@
+//! A structure to store the Todoist API configuration.
+
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 
+/// A structure to store the Todoist API configuration.
 #[derive(Debug, Clone)]
 pub struct TodoistConfig {
+    /// The Todoist API token (see <https://developer.todoist.com/rest/v2/#authorization>)
     pub token: String,
+    #[doc(hidden)]
     pub client: Client,
 }
 
+#[doc(hidden)]
 impl TodoistConfig {
     pub fn new(token: String) -> Result<TodoistConfig, TodoistConfigCreationErrors> {
         let mut headers = HeaderMap::new();
@@ -23,13 +29,24 @@ impl TodoistConfig {
     }
 }
 
+/// Creates a [TodoistConfig]
+///
+/// # Arguments
+///
+/// * `token` - The Todoist API token to use (see <https://developer.todoist.com/rest/v2/#authorization>)
 pub fn create_config(token: String) -> Result<TodoistConfig, TodoistConfigCreationErrors> {
     TodoistConfig::new(token)
 }
 
+/// Types of errors that can occur when creating a [TodoistConfig]
 #[derive(Debug)]
 pub enum TodoistConfigCreationErrors {
+    /// An error for when the token format is invalid (such as containing a newline)
     InvalidTokenFormat(InvalidTokenFormatError),
+    /// An error for when the `reqwest` [Client] could not be created
+    /// From the [reqwest::ClientBuilder::build] documentation:
+    /// > This method fails if a TLS backend cannot be initialized,
+    /// > or the resolver cannot load the system configuration.
     HttpClientCreationError(reqwest::Error),
 }
 
@@ -60,6 +77,7 @@ impl From<reqwest::Error> for TodoistConfigCreationErrors {
     }
 }
 
+/// An error that is thrown when the token is not in the correct format (such as containing a newline)
 #[derive(Debug, Clone)]
 pub struct InvalidTokenFormatError {
     token: String,

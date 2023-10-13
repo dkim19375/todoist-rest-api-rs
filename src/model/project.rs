@@ -1,8 +1,10 @@
+//! Structures and enums representing objects in the Todoist Projects API (<https://developer.todoist.com/rest/v2/?shell#projects>)
+
 use serde::{Deserialize, Serialize};
 
 use crate::model::color::Color;
 
-/// A Todoist Project
+/// A Todoist project (<https://developer.todoist.com/rest/v2/?shell#projects>)
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Project {
     /// The project ID
@@ -31,10 +33,13 @@ pub struct Project {
     pub url: String,
 }
 
+/// The way that the user views the project in the Todoist clients
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ProjectViewStyle {
+    /// The project is displayed as a list
     #[serde(rename = "list")]
     List,
+    /// The project is displayed as a board
     #[serde(rename = "board")]
     Board,
 }

@@ -1,9 +1,16 @@
+//! Structures and enums representing colors in the Todoist API (<https://developer.todoist.com/guides/#colors>)
+//!
+//! These colors are currently being used in [labels](crate::model::label::Label)
+//! and [projects](crate::model::project::Project)
+
 use fmt::Display;
 use std::fmt;
 use std::fmt::Formatter;
 
 use serde::{Deserialize, Serialize};
 
+/// An enum of the colors used in the Todoist API
+#[allow(missing_docs)]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum Color {
     #[serde(rename = "berry_red")]
@@ -56,6 +63,7 @@ impl Display for Color {
 
 impl Color {
     //noinspection SpellCheckingInspection
+    /// Get the hexadecimal form of the [Color]
     pub fn get_hex(&self) -> ColorHex {
         match self {
             Color::BerryRed => ColorHex { hex: String::from("#B8256F") },
@@ -81,6 +89,7 @@ impl Color {
         }
     }
 
+    /// Get the Todoist API ID of the [Color]
     pub fn get_id(&self) -> u8 {
         match self {
             Color::BerryRed => 30,
@@ -107,8 +116,10 @@ impl Color {
     }
 }
 
+/// The hexadecimal value of a color
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ColorHex {
+    /// The hexadecimal [String] value of a color
     pub hex: String,
 }
 

@@ -1,3 +1,5 @@
+//! Todoist Comments API (<https://developer.todoist.com/rest/v2/?shell#comments>)
+
 use crate::internal::request::{paths, RequestError, send_todoist_delete_request, send_todoist_get_request, send_todoist_post_request};
 use crate::internal::request::models::{CreateNewCommentArgs, UpdateCommentArgs};
 use crate::internal::request::paths::create_path;
@@ -57,21 +59,24 @@ fn get_comment_path(comment_id: String) -> String {
     create_path(&[paths::COMMENTS, &comment_id])
 }
 
+/// An enum to represent either a [task](crate::model::task::Task) or a [project](crate::model::project::Project) ID
 #[derive(Debug)]
 pub enum TaskOrProjectID {
+    /// A [task](crate::model::task::Task) ID
     Task(String),
+    /// A [project](crate::model::project::Project) ID
     Project(String),
 }
 
 impl TaskOrProjectID {
-    pub fn get_id(&self) -> &String {
+    fn get_id(&self) -> &String {
         match self {
             TaskOrProjectID::Task(id) => id,
             TaskOrProjectID::Project(id) => id,
         }
     }
 
-    pub fn get_key(&self) -> String {
+    fn get_key(&self) -> String {
         match self {
             TaskOrProjectID::Task(_) => "task_id",
             TaskOrProjectID::Project(_) => "project_id",

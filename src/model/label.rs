@@ -1,7 +1,10 @@
+//! Structures representing objects in the Todoist Labels API (<https://developer.todoist.com/rest/v2/?shell#labels>)
+
 use serde::{Deserialize, Serialize};
 
 use crate::model::color::Color;
 
+/// A Todoist label (<https://developer.todoist.com/rest/v2/?shell#labels>)
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Label {
     /// The label ID

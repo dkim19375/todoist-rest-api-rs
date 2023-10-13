@@ -1,3 +1,5 @@
+//! Structures and enums representing objects in the Todoist Task API (<https://developer.todoist.com/rest/v2/?shell#tasks>)
+
 use std::time::Duration;
 
 use chrono::{DateTime, TimeZone};
@@ -5,6 +7,7 @@ use chrono::FixedOffset;
 use chrono_tz::Tz;
 use serde::{Deserialize, Serialize};
 
+/// A Todoist task
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Task {
     /// The task ID
@@ -45,6 +48,7 @@ pub struct Task {
     pub duration: Option<TaskDuration>,
 }
 
+/// A structure that stores a task's due date and time
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskDueDateTime {
     /// The human defined date in an arbitrary format
@@ -63,6 +67,7 @@ pub struct TaskDueDateTime {
 }
 
 impl TaskDueDateTime {
+    /// Get the due date of a time as a `chrono` [DateTime]
     //#[cfg(feature = "chrono")]
     pub fn get_chrono_due_datetime(&self) -> Option<DateTime<FixedOffset>> {
         if let (Some(datetime), Some(timezone)) = (&self.datetime, &self.timezone) {
@@ -89,6 +94,7 @@ impl TaskDueDateTime {
     }
 }
 
+/// A structure storing the duration of a [Task]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskDuration {
     /// The `amount` of time the task will take (greater than zero)
@@ -98,6 +104,7 @@ pub struct TaskDuration {
 }
 
 impl TaskDuration {
+    /// Get the duration of a task as a [Duration]
     pub fn get_duration(&self) -> Duration {
         match self.unit {
             TaskDurationUnit::Minute => Duration::from_secs(self.amount * 60),
@@ -105,6 +112,7 @@ impl TaskDuration {
         }
     }
 
+    /// Get the duration of a task as a [chrono::Duration]
     //#[cfg(feature = "chrono")]
     pub fn get_chrono_duration(&self) -> chrono::Duration {
         match self.unit {
@@ -114,10 +122,13 @@ impl TaskDuration {
     }
 }
 
+/// An enum representing the unit of time for a [TaskDuration]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskDurationUnit {
+    /// A duration in minutes
     #[serde(rename = "minute")]
     Minute,
+    /// A duration in days
     #[serde(rename = "day")]
     Day,
 }

@@ -1,5 +1,8 @@
+//! Structures representing objects in the Todoist Comments API (<https://developer.todoist.com/rest/v2/?shell#comments>)
+
 use serde::{Deserialize, Serialize};
 
+/// A Todoist comment (<https://developer.todoist.com/rest/v2/?shell#comments>)
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Comment {
     /// The comment ID
@@ -17,6 +20,7 @@ pub struct Comment {
 }
 
 // TODO - figure out what attributes go here
+/// A structure that represents an attachment for a Todoist comment.
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CommentAttachment {
     /// The name of the file
