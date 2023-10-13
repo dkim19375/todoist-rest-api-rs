@@ -3,8 +3,8 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::Client;
 
 /// A structure to store the Todoist API configuration.
 #[derive(Debug, Clone)]
@@ -19,9 +19,14 @@ pub struct TodoistConfig {
 impl TodoistConfig {
     pub fn new(token: String) -> Result<TodoistConfig, TodoistConfigCreationErrors> {
         let mut headers = HeaderMap::new();
-        headers.insert("Authorization", HeaderValue::from_str(&format!("Bearer {}", token)).map_err(|_| {
-            InvalidTokenFormatError { token: token.clone() }
-        })?);
+        headers.insert(
+            "Authorization",
+            HeaderValue::from_str(&format!("Bearer {}", token)).map_err(|_| {
+                InvalidTokenFormatError {
+                    token: token.clone(),
+                }
+            })?,
+        );
         Ok(TodoistConfig {
             token,
             client: Client::builder().default_headers(headers).build()?,

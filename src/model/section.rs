@@ -1,9 +1,9 @@
 //! Structures representing objects in the Todoist Sections API (<https://developer.todoist.com/rest/v2/?shell#sections>)
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// A Todoist section (<https://developer.todoist.com/rest/v2/?shell#sections>)
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Section {
     /// The section ID
     pub id: String,

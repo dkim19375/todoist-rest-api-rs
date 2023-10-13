@@ -2,13 +2,13 @@
 
 use std::time::Duration;
 
-use chrono::{DateTime, TimeZone};
 use chrono::FixedOffset;
+use chrono::{DateTime, TimeZone};
 use chrono_tz::Tz;
 use serde::{Deserialize, Serialize};
 
 /// A Todoist task
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Task {
     /// The task ID
     pub id: String,
@@ -59,10 +59,12 @@ pub struct TaskDueDateTime {
     pub is_recurring: bool,
     /// Only returned if exact due time set (i.e. it's not a whole-day task),
     /// date and time in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format in UTC
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub datetime: Option<String>,
     /// Only returned if exact due time set, user's timezone definition either in tzdata-compatible
     /// format ("Europe/Berlin") or as a string specifying east of the UTC offset as "UTC±HH:MM"
     /// (i.e. "UTC-01:00")
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timezone: Option<String>,
 }
 
@@ -79,15 +81,28 @@ impl TaskDueDateTime {
             }
             let chars = timezone.chars().collect::<Vec<char>>();
             let positive = chars[3] == '+';
-            let hours = chars[4..6].iter().collect::<String>().parse::<i32>().unwrap();
-            let minutes = chars[7..9].iter().collect::<String>().parse::<i32>().unwrap();
+            let hours = chars[4..6]
+                .iter()
+                .collect::<String>()
+                .parse::<i32>()
+                .unwrap();
+            let minutes = chars[7..9]
+                .iter()
+                .collect::<String>()
+                .parse::<i32>()
+                .unwrap();
             let secs = hours * 3600 + minutes * 60;
             let fixed_offset = if positive {
                 FixedOffset::east_opt(secs)
             } else {
                 FixedOffset::west_opt(secs)
-            }.unwrap();
-            Some(fixed_offset.from_local_datetime(&parsed.naive_utc()).unwrap())
+            }
+            .unwrap();
+            Some(
+                fixed_offset
+                    .from_local_datetime(&parsed.naive_utc())
+                    .unwrap(),
+            )
         } else {
             None
         }

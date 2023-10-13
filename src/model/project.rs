@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::model::color::Color;
 
 /// A Todoist project (<https://developer.todoist.com/rest/v2/?shell#projects>)
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Project {
     /// The project ID
     pub id: String,

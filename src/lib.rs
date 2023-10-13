@@ -11,5 +11,3 @@ pub mod model;
 pub mod todoist_config;
 
 mod internal;
-
-

@@ -14,10 +14,13 @@ pub mod paths;
 
 const TODOIST_API_URL: &str = "https://api.todoist.com/rest/v2";
 
-pub async fn send_todoist_get_request<T: DeserializeOwned>(config: &TodoistConfig, path: String) -> Result<T, RequestError> {
-    send_todoist_request::<(), T>(
-        config, path, None, RequestMethod::Get, false,
-    ).await.map(|res| res.unwrap())
+pub async fn send_todoist_get_request<T: DeserializeOwned>(
+    config: &TodoistConfig,
+    path: String,
+) -> Result<T, RequestError> {
+    send_todoist_request::<(), T>(config, path, None, RequestMethod::Get, false)
+        .await
+        .map(|res| res.unwrap())
 }
 
 pub async fn send_todoist_post_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
@@ -27,14 +30,23 @@ pub async fn send_todoist_post_request<Req: Serialize + ?Sized, Res: Deserialize
     include_request_id: bool,
 ) -> Result<Res, RequestError> {
     send_todoist_request::<Req, Res>(
-        config, path, Some(data), RequestMethod::Post, include_request_id,
-    ).await.map(|res| res.unwrap())
+        config,
+        path,
+        Some(data),
+        RequestMethod::Post,
+        include_request_id,
+    )
+    .await
+    .map(|res| res.unwrap())
 }
 
-pub async fn send_todoist_delete_request(config: &TodoistConfig, path: String) -> Result<(), RequestError> {
-    send_todoist_request::<(), ()>(
-        config, path, None, RequestMethod::Delete, false,
-    ).await.map(|_| ())
+pub async fn send_todoist_delete_request(
+    config: &TodoistConfig,
+    path: String,
+) -> Result<(), RequestError> {
+    send_todoist_request::<(), ()>(config, path, None, RequestMethod::Delete, false)
+        .await
+        .map(|_| ())
 }
 
 async fn send_todoist_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
@@ -59,12 +71,14 @@ async fn send_todoist_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
     if response.status().is_client_error() {
         return Err(InvalidRequestError {
             status_code: NonZeroU16::new(response.status().as_u16()).unwrap(),
-        }.into());
+        }
+        .into());
     }
     if response.status().is_server_error() {
         return Err(ServerError {
             status_code: NonZeroU16::new(response.status().as_u16()).unwrap(),
-        }.into());
+        }
+        .into());
     }
     if response.status() == 204 {
         return Ok(None);

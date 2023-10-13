@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A Todoist comment (<https://developer.todoist.com/rest/v2/?shell#comments>)
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Comment {
     /// The comment ID
     pub id: String,
