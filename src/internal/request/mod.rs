@@ -153,6 +153,8 @@ impl Display for APIParametersError {
     }
 }
 
+impl Error for APIParametersError {}
+
 impl Error for TodoistAPIError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
