@@ -19,12 +19,12 @@ pub async fn get_all_projects(config: &TodoistConfig) -> Result<Vec<Project>, Re
 /// Creates a new [project](Project)
 ///
 /// # Arguments
-/// * config - The [TodoistConfig] used to use the Todoist API
-/// * name - The name of the project
-/// * parent_id - The ID of the parent project ([None] for top-level projects)
-/// * color - The [color](Color) of the project icon
-/// * is_favorite - Whether the project is a favorite
-/// * view_style - The way the project is displayed within the Todoist clients
+/// * `config` - The [TodoistConfig] used to use the Todoist API
+/// * `name` - The name of the project
+/// * `parent_id` - The ID of the parent project ([None] for top-level projects)
+/// * `color` - The [color](Color) of the project icon
+/// * `is_favorite` - Whether the project is a favorite
+/// * `view_style` - The way the project is displayed within the Todoist clients
 pub async fn create_new_project(
     config: &TodoistConfig,
     name: String,
@@ -59,11 +59,11 @@ pub async fn get_project(
 /// Updates a project
 ///
 /// # Arguments
-/// * config - The [TodoistConfig] used to use the Todoist API
-/// * name - The name of the project
-/// * color - The [color](Color) of the project icon
-/// * is_favorite - Whether the project is a favorite
-/// * view_style - The way the project is displayed within the Todoist clients
+/// * `config` - The [TodoistConfig] used to use the Todoist API
+/// * `name` - The name of the project
+/// * `color` - The [color](Color) of the project icon
+/// * `is_favorite` - Whether the project is a favorite
+/// * `view_style` - The way the project is displayed within the Todoist clients
 pub async fn update_project(
     config: &TodoistConfig,
     project_id: String,
