@@ -77,3 +77,16 @@ pub struct UpdateProjectArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_style: Option<ProjectViewStyle>,
 }
+
+#[derive(Debug, Clone, Serialize)]
+pub struct CreateNewSectionArgs {
+    pub name: String,
+    pub project_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<u32>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct UpdateSectionArgs {
+    pub name: String,
+}

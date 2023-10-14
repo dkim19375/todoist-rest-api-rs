@@ -8,6 +8,11 @@ pub const LABELS_SHARED_RENAME: &str = "/labels/shared/rename";
 pub const LABELS_SHARED_REMOVE: &str = "/labels/shared/remove";
 
 pub const PROJECTS: &str = "/projects";
+
+pub const SECTIONS: &str = "/sections";
+
+pub const PARAM_PROJECT_ID: &str = "project_id=";
+
 pub fn create_path(paths: &[impl ToString]) -> String {
     let mut final_path = String::new();
     let mut last_was_param = false;
