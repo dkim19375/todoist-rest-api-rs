@@ -1,17 +1,25 @@
+// Additional paths
+pub const CLOSE: &str = "/close";
 pub const COLLABORATORS: &str = "/collaborators";
+pub const REOPEN: &str = "/reopen";
 
+// Base paths
 pub const COMMENTS: &str = "/comments";
-
 pub const LABELS: &str = "/labels";
 pub const LABELS_SHARED: &str = "/labels/shared";
 pub const LABELS_SHARED_RENAME: &str = "/labels/shared/rename";
 pub const LABELS_SHARED_REMOVE: &str = "/labels/shared/remove";
-
 pub const PROJECTS: &str = "/projects";
-
 pub const SECTIONS: &str = "/sections";
+pub const TASKS: &str = "/tasks";
 
+// Parameters
+pub const PARAM_FILTER: &str = "filter=";
+pub const PARAM_IDS: &str = "ids=";
+pub const PARAM_LABEL: &str = "label=";
+pub const PARAM_LANG: &str = "lang=";
 pub const PARAM_PROJECT_ID: &str = "project_id=";
+pub const PARAM_SECTION_ID: &str = "section_id=";
 
 pub fn create_path(paths: &[impl ToString]) -> String {
     let mut final_path = String::new();

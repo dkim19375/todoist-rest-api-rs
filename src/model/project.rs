@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::comments::TaskOrProjectID;
-use crate::internal::request::RequestError;
+use crate::internal::request::TodoistAPIError;
 use crate::model::color::Color;
 use crate::model::comment::{Comment, CommentAttachment};
 use crate::todoist_config::TodoistConfig;
@@ -41,7 +41,7 @@ impl Project {
     /// Creates a new copy of this [Project] with a new ID from the Todoist API
     ///
     /// This method is a shortcut for [`todoist_rest_api::projects::create_new_project(config, project.name, project.parent_id, Some(project.color), Some(project.is_favorite), Some(project.view_style))`](crate::projects::create_new_project)
-    pub async fn create_new_copy(self, config: &TodoistConfig) -> Result<Project, RequestError> {
+    pub async fn create_new_copy(self, config: &TodoistConfig) -> Result<Project, TodoistAPIError> {
         crate::projects::create_new_project(
             config,
             self.name,
@@ -55,19 +55,22 @@ impl Project {
 
     /// Retrieves the updated project from the Todoist API using this project's ID.
     ///
-    /// If the project no longer exists, then a [RequestError] will be returned.
+    /// If the project no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::projects::get_project(config, project.id)`](crate::projects::get_project)
-    pub async fn retrieve_updated(self, config: &TodoistConfig) -> Result<Project, RequestError> {
+    pub async fn retrieve_updated(
+        self,
+        config: &TodoistConfig,
+    ) -> Result<Project, TodoistAPIError> {
         crate::projects::get_project(config, self.id).await
     }
 
     /// Updates and overwrites the project in Todoist with this [Project]
     ///
-    /// If the project no longer exists, then a [RequestError] will be returned.
+    /// If the project no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::projects::update_project(config, project.id, Some(project.name), Some(project.color), Some(project.is_favorite), Some(project.view_style))`](crate::projects::update_project)
-    pub async fn update(self, config: &TodoistConfig) -> Result<Project, RequestError> {
+    pub async fn update(self, config: &TodoistConfig) -> Result<Project, TodoistAPIError> {
         crate::projects::update_project(
             config,
             self.id,
@@ -82,28 +85,28 @@ impl Project {
     // Todo check if error is actually returned
     /// Deletes this project from Todoist
     ///
-    /// If the project no longer exists, then a [RequestError] will be returned.
+    /// If the project no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::projects::delete_project(config, project.id)`](crate::projects::delete_project)
-    pub async fn delete(self, config: &TodoistConfig) -> Result<(), RequestError> {
+    pub async fn delete(self, config: &TodoistConfig) -> Result<(), TodoistAPIError> {
         crate::projects::delete_project(config, self.id).await
     }
 
     /// Get all of the [comments](Comment) for this project
     ///
-    /// If the project no longer exists, then a [RequestError] will be returned.
+    /// If the project no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::comments::get_all_comments(config, &TaskOrProjectID::Project(project.id))`](crate::comments::get_all_comments)
     pub async fn get_all_comments(
         self,
         config: &TodoistConfig,
-    ) -> Result<Vec<Comment>, RequestError> {
+    ) -> Result<Vec<Comment>, TodoistAPIError> {
         crate::comments::get_all_comments(config, &TaskOrProjectID::Project(self.id)).await
     }
 
     /// Creates a new [comment](Comment) for this project
     ///
-    /// If the project no longer exists, then a [RequestError] will be returned.
+    /// If the project no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::comments::create_new_comment(config, &TaskOrProjectID::Project(project.id), content, attachment)`](crate::comments::create_new_comment)
     pub async fn create_new_comment(
@@ -111,7 +114,7 @@ impl Project {
         config: &TodoistConfig,
         content: String,
         attachment: Option<CommentAttachment>,
-    ) -> Result<Comment, RequestError> {
+    ) -> Result<Comment, TodoistAPIError> {
         crate::comments::create_new_comment(
             config,
             &TaskOrProjectID::Project(self.id),

@@ -4,7 +4,7 @@ use crate::internal::request::models::{CreateNewProjectArgs, UpdateProjectArgs};
 use crate::internal::request::paths::create_path;
 use crate::internal::request::{
     paths, send_todoist_delete_request, send_todoist_get_request, send_todoist_post_request,
-    RequestError,
+    TodoistAPIError,
 };
 use crate::model::collaborator::Collaborator;
 use crate::model::color::Color;
@@ -12,7 +12,7 @@ use crate::model::project::{Project, ProjectViewStyle};
 use crate::todoist_config::TodoistConfig;
 
 /// Gets all user [projects](Project)
-pub async fn get_all_projects(config: &TodoistConfig) -> Result<Vec<Project>, RequestError> {
+pub async fn get_all_projects(config: &TodoistConfig) -> Result<Vec<Project>, TodoistAPIError> {
     send_todoist_get_request(config, paths::PROJECTS.to_string()).await
 }
 
@@ -32,17 +32,17 @@ pub async fn create_new_project(
     color: Option<Color>,
     is_favorite: Option<bool>,
     view_style: Option<ProjectViewStyle>,
-) -> Result<Project, RequestError> {
+) -> Result<Project, TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::PROJECTS.to_string(),
-        &CreateNewProjectArgs {
+        Some(&CreateNewProjectArgs {
             name,
             parent_id,
             color,
             is_favorite,
             view_style,
-        },
+        }),
         true,
     )
     .await
@@ -52,7 +52,7 @@ pub async fn create_new_project(
 pub async fn get_project(
     config: &TodoistConfig,
     project_id: String,
-) -> Result<Project, RequestError> {
+) -> Result<Project, TodoistAPIError> {
     send_todoist_get_request(config, create_path(&[paths::PROJECTS, &project_id])).await
 }
 
@@ -71,16 +71,16 @@ pub async fn update_project(
     color: Option<Color>,
     is_favorite: Option<bool>,
     view_style: Option<ProjectViewStyle>,
-) -> Result<Project, RequestError> {
+) -> Result<Project, TodoistAPIError> {
     send_todoist_post_request(
         config,
         create_path(&[paths::PROJECTS, &project_id]),
-        &UpdateProjectArgs {
+        Some(&UpdateProjectArgs {
             name,
             color,
             is_favorite,
             view_style,
-        },
+        }),
         true,
     )
     .await
@@ -90,7 +90,7 @@ pub async fn update_project(
 pub async fn delete_project(
     config: &TodoistConfig,
     project_id: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_delete_request(config, create_path(&[paths::PROJECTS, &project_id])).await
 }
 
@@ -98,7 +98,7 @@ pub async fn delete_project(
 pub async fn get_all_collaborators(
     config: &TodoistConfig,
     project_id: String,
-) -> Result<Vec<Collaborator>, RequestError> {
+) -> Result<Vec<Collaborator>, TodoistAPIError> {
     send_todoist_get_request(
         config,
         create_path(&[paths::PROJECTS, &project_id, paths::COLLABORATORS]),

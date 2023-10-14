@@ -7,13 +7,13 @@ use crate::internal::request::{
 };
 use crate::model::section::Section;
 use crate::todoist_config::TodoistConfig;
-use crate::RequestError;
+use crate::TodoistAPIError;
 
 /// Get all [sections](Section), optionally filtering the returned sections with a project ID
 pub async fn get_all_sections(
     config: &TodoistConfig,
     project_id: Option<String>,
-) -> Result<Vec<Section>, RequestError> {
+) -> Result<Vec<Section>, TodoistAPIError> {
     send_todoist_get_request(
         config,
         match project_id {
@@ -30,15 +30,15 @@ pub async fn create_new_section(
     project_id: String,
     name: String,
     order: Option<u32>,
-) -> Result<Section, RequestError> {
+) -> Result<Section, TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::SECTIONS.to_string(),
-        &CreateNewSectionArgs {
+        Some(&CreateNewSectionArgs {
             project_id,
             name,
             order,
-        },
+        }),
         false,
     )
     .await
@@ -48,7 +48,7 @@ pub async fn create_new_section(
 pub async fn get_section(
     config: &TodoistConfig,
     section_id: String,
-) -> Result<Section, RequestError> {
+) -> Result<Section, TodoistAPIError> {
     send_todoist_get_request(config, get_section_path(section_id)).await
 }
 
@@ -57,11 +57,11 @@ pub async fn update_section(
     config: &TodoistConfig,
     section_id: String,
     name: String,
-) -> Result<Section, RequestError> {
+) -> Result<Section, TodoistAPIError> {
     send_todoist_post_request(
         config,
         get_section_path(section_id),
-        &UpdateSectionArgs { name },
+        Some(&UpdateSectionArgs { name }),
         false,
     )
     .await
@@ -71,7 +71,7 @@ pub async fn update_section(
 pub async fn delete_section(
     config: &TodoistConfig,
     section_id: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_delete_request(config, get_section_path(section_id)).await
 }
 

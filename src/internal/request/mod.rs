@@ -17,7 +17,7 @@ const TODOIST_API_URL: &str = "https://api.todoist.com/rest/v2";
 pub async fn send_todoist_get_request<T: DeserializeOwned>(
     config: &TodoistConfig,
     path: String,
-) -> Result<T, RequestError> {
+) -> Result<T, TodoistAPIError> {
     send_todoist_request::<(), T>(config, path, None, RequestMethod::Get, false)
         .await
         .map(|res| res.unwrap())
@@ -26,24 +26,18 @@ pub async fn send_todoist_get_request<T: DeserializeOwned>(
 pub async fn send_todoist_post_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
     config: &TodoistConfig,
     path: String,
-    data: &Req,
+    data: Option<&Req>,
     include_request_id: bool,
-) -> Result<Res, RequestError> {
-    send_todoist_request::<Req, Res>(
-        config,
-        path,
-        Some(data),
-        RequestMethod::Post,
-        include_request_id,
-    )
-    .await
-    .map(|res| res.unwrap())
+) -> Result<Res, TodoistAPIError> {
+    send_todoist_request::<Req, Res>(config, path, data, RequestMethod::Post, include_request_id)
+        .await
+        .map(|res| res.unwrap())
 }
 
 pub async fn send_todoist_delete_request(
     config: &TodoistConfig,
     path: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_request::<(), ()>(config, path, None, RequestMethod::Delete, false)
         .await
         .map(|_| ())
@@ -55,7 +49,7 @@ async fn send_todoist_request<Req: Serialize + ?Sized, Res: DeserializeOwned>(
     data: Option<&Req>,
     method: RequestMethod,
     include_request_id: bool,
-) -> Result<Option<Res>, RequestError> {
+) -> Result<Option<Res>, TodoistAPIError> {
     if !path.starts_with('/') {
         panic!("Path must start with a '/'! Instead was '{}'", path);
     }
@@ -106,7 +100,7 @@ impl From<RequestMethod> for Method {
 
 /// Errors for when an HTTP request is sent and fails
 #[derive(Debug)]
-pub enum RequestError {
+pub enum TodoistAPIError {
     /// Received a 4xx error
     InvalidRequest(InvalidRequestError),
     /// Received a 5xx error
@@ -116,6 +110,8 @@ pub enum RequestError {
     ///
     /// See [reqwest::RequestBuilder::send]
     RequestSendError(reqwest::Error),
+    /// If parameters to `todoist_rest_api` are invalid
+    APIParametersError(APIParametersError),
     /// If there was an error while parsing a JSON response
     ResponseJSONParseError(serde_json::Error),
 }
@@ -146,43 +142,61 @@ impl Display for ServerError {
 
 impl Error for ServerError {}
 
-impl Error for RequestError {
+#[derive(Debug, Clone)]
+pub struct APIParametersError {
+    pub(crate) message: String,
+}
+
+impl Display for APIParametersError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "API parameters error - {}", self.message)
+    }
+}
+
+impl Error for TodoistAPIError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            RequestError::InvalidRequest(ref e) => Some(e),
-            RequestError::ServerError(ref e) => Some(e),
-            RequestError::RequestSendError(ref e) => Some(e),
-            RequestError::ResponseJSONParseError(ref e) => Some(e),
+            TodoistAPIError::InvalidRequest(ref e) => Some(e),
+            TodoistAPIError::ServerError(ref e) => Some(e),
+            TodoistAPIError::RequestSendError(ref e) => Some(e),
+            TodoistAPIError::ResponseJSONParseError(ref e) => Some(e),
+            TodoistAPIError::APIParametersError(ref e) => Some(e),
         }
     }
 }
 
-impl Display for RequestError {
+impl Display for TodoistAPIError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         <dyn Error as Display>::fmt(self.source().unwrap(), f)
     }
 }
 
-impl From<InvalidRequestError> for RequestError {
+impl From<InvalidRequestError> for TodoistAPIError {
     fn from(value: InvalidRequestError) -> Self {
-        RequestError::InvalidRequest(value)
+        TodoistAPIError::InvalidRequest(value)
     }
 }
 
-impl From<ServerError> for RequestError {
+impl From<ServerError> for TodoistAPIError {
     fn from(value: ServerError) -> Self {
-        RequestError::ServerError(value)
+        TodoistAPIError::ServerError(value)
     }
 }
 
-impl From<reqwest::Error> for RequestError {
+impl From<reqwest::Error> for TodoistAPIError {
     fn from(value: reqwest::Error) -> Self {
-        RequestError::RequestSendError(value)
+        TodoistAPIError::RequestSendError(value)
     }
 }
 
-impl From<serde_json::Error> for RequestError {
+impl From<serde_json::Error> for TodoistAPIError {
     fn from(value: serde_json::Error) -> Self {
-        RequestError::ResponseJSONParseError(value)
+        TodoistAPIError::ResponseJSONParseError(value)
+    }
+}
+
+impl From<APIParametersError> for TodoistAPIError {
+    fn from(value: APIParametersError) -> Self {
+        TodoistAPIError::APIParametersError(value)
     }
 }

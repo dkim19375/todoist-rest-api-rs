@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 
-use crate::internal::request::RequestError;
+use crate::internal::request::TodoistAPIError;
 use crate::model::color::Color;
 use crate::todoist_config::TodoistConfig;
 
@@ -29,7 +29,7 @@ impl PersonalLabel {
     pub async fn create_new_copy(
         self,
         config: &TodoistConfig,
-    ) -> Result<PersonalLabel, RequestError> {
+    ) -> Result<PersonalLabel, TodoistAPIError> {
         crate::labels::create_new_personal_label(
             config,
             self.name,
@@ -42,23 +42,23 @@ impl PersonalLabel {
 
     /// Retrieves the updated label from the Todoist API using this label's ID.
     ///
-    /// If the label no longer exists, then a [RequestError] will be returned.
+    /// If the label no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for [`todoist_rest_api::labels::get_personal_label(config, label.id)`](crate::labels::get_personal_label)
     pub async fn retrieve_updated(
         self,
         config: &TodoistConfig,
-    ) -> Result<PersonalLabel, RequestError> {
+    ) -> Result<PersonalLabel, TodoistAPIError> {
         crate::labels::get_personal_label(config, self.id).await
     }
 
     /// Updates and overwrites the label in Todoist with this [PersonalLabel]
     ///
-    /// If the label no longer exists, then a [RequestError] will be returned.
+    /// If the label no longer exists, then a [TodoistAPIError] will be returned.
     ///
     /// This method is a shortcut for
     /// [`todoist_rest_api::labels::update_personal_label(config, label.id, Some(label.name), Some(label.order), Some(label.color), Some(label.is_favorite))`](crate::labels::update_personal_label)
-    pub async fn update(self, config: &TodoistConfig) -> Result<PersonalLabel, RequestError> {
+    pub async fn update(self, config: &TodoistConfig) -> Result<PersonalLabel, TodoistAPIError> {
         crate::labels::update_personal_label(
             config,
             self.id,
@@ -73,7 +73,7 @@ impl PersonalLabel {
     /// Deletes this [PersonalLabel]
     ///
     /// This method is a shortcut for [`todoist_rest_api::labels::delete_personal_label(config, label.id)`](crate::labels::delete_personal_label)
-    pub async fn delete(self, config: &TodoistConfig) -> Result<(), RequestError> {
+    pub async fn delete(self, config: &TodoistConfig) -> Result<(), TodoistAPIError> {
         crate::labels::delete_personal_label(config, self.id).await
     }
 }

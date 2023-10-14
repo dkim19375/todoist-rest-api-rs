@@ -3,6 +3,7 @@ use serde::Serialize;
 use crate::model::color::Color;
 use crate::model::comment::CommentAttachment;
 use crate::model::project::ProjectViewStyle;
+use crate::model::task::TaskDurationUnit;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CreateNewCommentArgs {
@@ -89,4 +90,38 @@ pub struct CreateNewSectionArgs {
 #[derive(Debug, Clone, Serialize)]
 pub struct UpdateSectionArgs {
     pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct CreateNewTaskArgs {
+    pub content: String,
+    pub description: Option<String>,
+    pub project_id: Option<String>,
+    pub section_id: Option<String>,
+    pub parent_id: Option<String>,
+    pub order: Option<u32>,
+    pub labels: Option<Vec<String>>,
+    pub priority: Option<u8>,
+    pub due_string: Option<String>,
+    pub due_date: Option<String>,
+    pub due_datetime: Option<String>,
+    pub due_lang: Option<String>,
+    pub assignee_id: Option<String>,
+    pub duration: Option<u64>,
+    pub duration_unit: Option<TaskDurationUnit>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct UpdateTaskArgs {
+    pub content: Option<String>,
+    pub description: Option<String>,
+    pub labels: Option<Vec<String>>,
+    pub priority: Option<u8>,
+    pub due_string: Option<String>,
+    pub due_date: Option<String>,
+    pub due_datetime: Option<String>,
+    pub due_lang: Option<String>,
+    pub assignee_id: Option<String>,
+    pub duration: Option<u64>,
+    pub duration_unit: Option<TaskDurationUnit>,
 }

@@ -14,7 +14,7 @@ use crate::internal::request::models::{
 use crate::internal::request::paths::create_path;
 use crate::internal::request::{
     paths, send_todoist_delete_request, send_todoist_get_request, send_todoist_post_request,
-    RequestError,
+    TodoistAPIError,
 };
 use crate::model::color::Color;
 use crate::model::label::PersonalLabel;
@@ -23,7 +23,7 @@ use crate::todoist_config::TodoistConfig;
 /// Get all personal user [labels](PersonalLabel)
 pub async fn get_all_personal_labels(
     config: &TodoistConfig,
-) -> Result<Vec<PersonalLabel>, RequestError> {
+) -> Result<Vec<PersonalLabel>, TodoistAPIError> {
     send_todoist_get_request(config, paths::LABELS.into()).await
 }
 
@@ -40,16 +40,16 @@ pub async fn create_new_personal_label(
     order: Option<u32>,
     color: Option<Color>,
     is_favorite: Option<bool>,
-) -> Result<PersonalLabel, RequestError> {
+) -> Result<PersonalLabel, TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::LABELS.into(),
-        &CreateNewPersonalLabelArgs {
+        Some(&CreateNewPersonalLabelArgs {
             name,
             order,
             color,
             is_favorite,
-        },
+        }),
         true,
     )
     .await
@@ -59,7 +59,7 @@ pub async fn create_new_personal_label(
 pub async fn get_personal_label(
     config: &TodoistConfig,
     label_id: String,
-) -> Result<PersonalLabel, RequestError> {
+) -> Result<PersonalLabel, TodoistAPIError> {
     send_todoist_get_request(config, get_label_path(label_id)).await
 }
 
@@ -71,16 +71,16 @@ pub async fn update_personal_label(
     order: Option<u32>,
     color: Option<Color>,
     is_favorite: Option<bool>,
-) -> Result<PersonalLabel, RequestError> {
+) -> Result<PersonalLabel, TodoistAPIError> {
     send_todoist_post_request(
         config,
         get_label_path(label_id),
-        &UpdatePersonalLabelArgs {
+        Some(&UpdatePersonalLabelArgs {
             name,
             order,
             color,
             is_favorite,
-        },
+        }),
         true,
     )
     .await
@@ -92,7 +92,7 @@ pub async fn update_personal_label(
 pub async fn delete_personal_label(
     config: &TodoistConfig,
     label_id: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_delete_request(config, get_label_path(label_id)).await
 }
 
@@ -104,7 +104,7 @@ pub async fn delete_personal_label(
 pub async fn get_all_shared_labels(
     config: &TodoistConfig,
     omit_personal: Option<bool>,
-) -> Result<Vec<String>, RequestError> {
+) -> Result<Vec<String>, TodoistAPIError> {
     send_todoist_get_request(
         config,
         format!(
@@ -128,11 +128,11 @@ pub async fn rename_shared_labels(
     config: &TodoistConfig,
     name: String,
     new_name: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::LABELS_SHARED_RENAME.into(),
-        &RenameSharedLabelsArgs { name, new_name },
+        Some(&RenameSharedLabelsArgs { name, new_name }),
         true,
     )
     .await
@@ -144,11 +144,11 @@ pub async fn rename_shared_labels(
 pub async fn remove_shared_labels(
     config: &TodoistConfig,
     name: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::LABELS_SHARED_REMOVE.into(),
-        &RemoveSharedLabelsArgs { name },
+        Some(&RemoveSharedLabelsArgs { name }),
         true,
     )
     .await

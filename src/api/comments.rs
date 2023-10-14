@@ -4,7 +4,7 @@ use crate::internal::request::models::{CreateNewCommentArgs, UpdateCommentArgs};
 use crate::internal::request::paths::create_path;
 use crate::internal::request::{
     paths, send_todoist_delete_request, send_todoist_get_request, send_todoist_post_request,
-    RequestError,
+    TodoistAPIError,
 };
 use crate::model::comment::{Comment, CommentAttachment};
 use crate::todoist_config::TodoistConfig;
@@ -14,7 +14,7 @@ use crate::todoist_config::TodoistConfig;
 pub async fn get_all_comments(
     config: &TodoistConfig,
     task_or_project_id: &TaskOrProjectID,
-) -> Result<Vec<Comment>, RequestError> {
+) -> Result<Vec<Comment>, TodoistAPIError> {
     send_todoist_get_request(
         config,
         format!(
@@ -33,11 +33,11 @@ pub async fn create_new_comment(
     task_or_project_id: &TaskOrProjectID,
     content: String,
     attachment: Option<CommentAttachment>,
-) -> Result<Comment, RequestError> {
+) -> Result<Comment, TodoistAPIError> {
     send_todoist_post_request(
         config,
         paths::COMMENTS.to_string(),
-        &CreateNewCommentArgs {
+        Some(&CreateNewCommentArgs {
             task_id: match task_or_project_id {
                 TaskOrProjectID::Task(id) => Some(id.clone()),
                 TaskOrProjectID::Project(_) => None,
@@ -48,7 +48,7 @@ pub async fn create_new_comment(
             },
             content,
             attachment,
-        },
+        }),
         true,
     )
     .await
@@ -58,7 +58,7 @@ pub async fn create_new_comment(
 pub async fn get_comment(
     config: &TodoistConfig,
     comment_id: String,
-) -> Result<Comment, RequestError> {
+) -> Result<Comment, TodoistAPIError> {
     send_todoist_get_request(config, get_comment_path(comment_id)).await
 }
 
@@ -67,11 +67,11 @@ pub async fn update_comment(
     config: &TodoistConfig,
     comment_id: String,
     content: String,
-) -> Result<Comment, RequestError> {
+) -> Result<Comment, TodoistAPIError> {
     send_todoist_post_request(
         config,
         get_comment_path(comment_id),
-        &UpdateCommentArgs { content },
+        Some(&UpdateCommentArgs { content }),
         true,
     )
     .await
@@ -81,7 +81,7 @@ pub async fn update_comment(
 pub async fn delete_comment(
     config: &TodoistConfig,
     comment_id: String,
-) -> Result<(), RequestError> {
+) -> Result<(), TodoistAPIError> {
     send_todoist_delete_request(config, get_comment_path(comment_id)).await
 }
 
