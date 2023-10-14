@@ -52,7 +52,7 @@ impl PersonalLabel {
         crate::labels::get_personal_label(config, self.id).await
     }
 
-    /// Updates and overwrites the label in Todoist with this [Label]
+    /// Updates and overwrites the label in Todoist with this [PersonalLabel]
     ///
     /// If the label no longer exists, then a [RequestError] will be returned.
     ///

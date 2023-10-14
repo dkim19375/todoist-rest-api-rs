@@ -113,8 +113,10 @@ pub enum RequestError {
     ServerError(ServerError),
     /// If there was an error while sending the request, a redirect loop was detected,
     /// or the redirect limit was exhausted
+    ///
     /// See [reqwest::RequestBuilder::send]
     RequestSendError(reqwest::Error),
+    /// If there was an error while parsing a JSON response
     ResponseJSONParseError(serde_json::Error),
 }
 

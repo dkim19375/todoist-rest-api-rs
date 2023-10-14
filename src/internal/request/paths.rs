@@ -1,3 +1,5 @@
+pub const COLLABORATORS: &str = "/collaborators";
+
 pub const COMMENTS: &str = "/comments";
 
 pub const LABELS: &str = "/labels";
@@ -5,6 +7,7 @@ pub const LABELS_SHARED: &str = "/labels/shared";
 pub const LABELS_SHARED_RENAME: &str = "/labels/shared/rename";
 pub const LABELS_SHARED_REMOVE: &str = "/labels/shared/remove";
 
+pub const PROJECTS: &str = "/projects";
 pub fn create_path(paths: &[impl ToString]) -> String {
     paths
         .iter()

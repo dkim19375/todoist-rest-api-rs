@@ -1,7 +1,5 @@
 /*!
-Todoist Labels API
-Todoist API Documentation URL: <https://developer.todoist.com/rest/v2/?shell#labels>
-
+Todoist Labels API (<https://developer.todoist.com/rest/v2/?shell#labels>)
 
 There are two different types of labels in Todoist - **personal labels** and **shared labels**.
 
@@ -141,6 +139,7 @@ pub async fn rename_shared_labels(
 }
 
 /// Remove all instances of a shared label.
+///
 /// If no instances of the label name are found, the request will still be considered successful.
 pub async fn remove_shared_labels(
     config: &TodoistConfig,

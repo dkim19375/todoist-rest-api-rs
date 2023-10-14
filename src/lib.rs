@@ -1,6 +1,8 @@
 #[doc(inline)]
 pub use api::*;
 #[doc(inline)]
+pub use internal::request::RequestError;
+#[doc(inline)]
 pub use todoist_config::create_config;
 
 #[warn(missing_docs)]
