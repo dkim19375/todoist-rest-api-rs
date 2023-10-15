@@ -14,3 +14,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test Rust
         run: cargo test --verbose --all-features
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set cargo fmt output
+        run: echo "FMT_OUTPUT=$(cargo fmt --message-format short)" >> $GITHUB_ENV
+      - name: Print cargo fmt output
+        run: echo "${{ env.FMT_OUTPUT }}"
+      - name: Check cargo fmt output
+        run: if [ -n "${{ env.FMT_OUTPUT }}" ]; then exit 1; fi
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: giraffate/clippy-action@v1
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}

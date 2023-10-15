@@ -6,7 +6,7 @@ use crate::internal::request::{
     paths, send_todoist_delete_request, send_todoist_get_request, send_todoist_post_request,
     APIParametersError,
 };
-use crate::model::task::{Task, TaskDurationUnit};
+use crate::model::task::{Task, TaskDuration};
 use crate::todoist_config::TodoistConfig;
 use crate::TodoistAPIError;
 
@@ -90,10 +90,7 @@ pub async fn get_active_tasks(
 /// * `due_datetime` - Specific date and time in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format in UTC
 /// * `due_lang` - 2-letter code specifying language in case `due_string` is not written in English
 /// * `assignee_id` - The responsible user ID (only applies to shared tasks)
-/// * `duration` - A positive (greater than zero) integer for the amount of `duration_unit` the task will take.
-/// If specified, you **must** define a `duration_unit`
-/// * `duration_unit` - The unit of time that the `duration` field above represents.
-/// If specified, `duration` **must** be defined as well.
+/// * `duration` - The duration that the task will take
 pub async fn create_new_task(
     config: &TodoistConfig,
     content: String,
@@ -109,8 +106,7 @@ pub async fn create_new_task(
     due_datetime: Option<String>,
     due_lang: Option<String>,
     assignee_id: Option<String>,
-    duration: Option<u64>,
-    duration_unit: Option<TaskDurationUnit>,
+    duration: Option<TaskDuration>,
 ) -> Result<Task, TodoistAPIError> {
     validate_task_args(
         &due_string,
@@ -119,7 +115,6 @@ pub async fn create_new_task(
         &priority,
         &due_lang,
         &duration,
-        &duration_unit,
     )?;
 
     send_todoist_post_request(
@@ -139,8 +134,8 @@ pub async fn create_new_task(
             due_datetime,
             due_lang,
             assignee_id,
-            duration,
-            duration_unit,
+            duration: duration.as_ref().map(|x| x.amount),
+            duration_unit: duration.map(|x| x.unit),
         }),
         true,
     )
@@ -174,9 +169,7 @@ pub async fn get_active_task(
 /// * `due_datetime` - Specific date and time in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) format in UTC
 /// * `due_lang` - 2-letter code specifying language in case `due_string` is not written in English
 /// * `assignee_id` - The responsible user ID (only applies to shared tasks)
-/// * `duration` - A positive (greater than zero) integer for the amount of `duration_unit` the task will take.
-/// If specified, you **must** define a `duration_unit`
-/// * `duration_unit` - The unit of time that the `duration` field above represents.
+/// * `duration` - The duration that the task will take
 /// If specified, `duration` **must** be defined as well.
 pub async fn update_task(
     config: &TodoistConfig,
@@ -190,8 +183,7 @@ pub async fn update_task(
     due_datetime: Option<String>,
     due_lang: Option<String>,
     assignee_id: Option<String>,
-    duration: Option<u64>,
-    duration_unit: Option<TaskDurationUnit>,
+    duration: Option<TaskDuration>,
 ) -> Result<Task, TodoistAPIError> {
     validate_task_args(
         &due_string,
@@ -200,7 +192,6 @@ pub async fn update_task(
         &priority,
         &due_lang,
         &duration,
-        &duration_unit,
     )?;
 
     send_todoist_post_request(
@@ -216,8 +207,8 @@ pub async fn update_task(
             due_datetime,
             due_lang,
             assignee_id,
-            duration,
-            duration_unit,
+            duration: duration.as_ref().map(|x| x.amount),
+            duration_unit: duration.map(|x| x.unit),
         }),
         true,
     )
@@ -259,8 +250,7 @@ fn validate_task_args(
     due_datetime: &Option<String>,
     priority: &Option<u8>,
     due_lang: &Option<String>,
-    duration: &Option<u64>,
-    duration_unit: &Option<TaskDurationUnit>,
+    duration: &Option<TaskDuration>,
 ) -> Result<(), TodoistAPIError> {
     let due_types = vec![
         due_string.to_owned(),
@@ -319,24 +309,15 @@ fn validate_task_args(
         }
     }
     if let Some(duration) = duration {
-        if duration_unit.is_none() {
+        if duration.amount == 0 {
             return Err(APIParametersError {
-                message: format!("The duration_unit must be defined if duration is defined"),
+                message: format!(
+                    "The duration must be greater than 0 (was {})",
+                    duration.amount
+                ),
             }
             .into());
         }
-        if *duration == 0 {
-            return Err(APIParametersError {
-                message: format!("The duration must be greater than 0 (was {})", duration),
-            }
-            .into());
-        }
-    }
-    if duration_unit.is_some() && duration.is_none() {
-        return Err(APIParametersError {
-            message: format!("The duration must be defined if duration_unit is defined"),
-        }
-        .into());
     }
     Ok(())
 }
@@ -351,10 +332,16 @@ fn validate_yyyy_mm_dd(date: String) -> Option<String> {
     if date[0..4].parse::<u16>().is_err() {
         return Some("invalid year".into());
     }
-    if date[5..7].parse::<u8>().is_ok_and(|x| x >= 1 && x <= 12) {
+    if date[5..7]
+        .parse::<u8>()
+        .is_ok_and(|x| (1..=12).contains(&x))
+    {
         return Some("invalid month".into());
     }
-    if date[8..10].parse::<u8>().is_ok_and(|x| x >= 1 && x <= 31) {
+    if date[8..10]
+        .parse::<u8>()
+        .is_ok_and(|x| (1..=31).contains(&x))
+    {
         return Some("invalid day".into());
     }
     None
@@ -371,22 +358,13 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
     if t_or_space != 'T' && t_or_space != ' ' {
         return Some("missing T or space".into());
     }
-    if datetime[11..13]
-        .parse::<u8>()
-        .is_ok_and(|x| x >= 0 && x <= 23)
-    {
+    if datetime[11..13].parse::<u8>().is_ok_and(|x| x <= 23) {
         return Some("invalid hour".into());
     }
-    if datetime[14..16]
-        .parse::<u8>()
-        .is_ok_and(|x| x >= 0 && x <= 59)
-    {
+    if datetime[14..16].parse::<u8>().is_ok_and(|x| x <= 59) {
         return Some("invalid minute".into());
     }
-    if datetime[17..19]
-        .parse::<u8>()
-        .is_ok_and(|x| x >= 0 && x <= 60)
-    {
+    if datetime[17..19].parse::<u8>().is_ok_and(|x| x <= 60) {
         return Some("invalid second".into());
     }
     let mut timezone_index = 19;
@@ -403,7 +381,7 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
                 break;
             }
             timezone_index += 1;
-            if char < '0' || char > '9' {
+            if !char.is_ascii_digit() {
                 return Some("invalid time fraction number".into());
             }
         }
@@ -420,13 +398,13 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
     }
     if datetime[timezone_index + 1..timezone_index + 3]
         .parse::<u8>()
-        .is_ok_and(|x| x >= 0 && x <= 23)
+        .is_ok_and(|x| x <= 23)
     {
         return Some("invalid timezone hour".into());
     }
     if datetime[timezone_index + 4..timezone_index + 6]
         .parse::<u8>()
-        .is_ok_and(|x| x >= 0 && x <= 59)
+        .is_ok_and(|x| x <= 59)
     {
         return Some("invalid timezone minute".into());
     }
@@ -435,4 +413,43 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
 
 fn get_task_path(task_id: String) -> String {
     create_path(&[paths::TASKS, &task_id])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate_yyyy_mm_dd_valid() {
+        assert!(validate_yyyy_mm_dd("2020-12-15".into()).is_none());
+        assert!(validate_yyyy_mm_dd("9999-12-31".into()).is_none());
+        assert!(validate_yyyy_mm_dd("0000-01-01".into()).is_none());
+    }
+
+    #[test]
+    fn validate_yyyy_mm_dd_invalid() {
+        assert!(validate_yyyy_mm_dd("".into()).is_some());
+        assert!(validate_yyyy_mm_dd("202-01-01".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-1-01".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-01-1".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-01-01-".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-00-01".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-13-01".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-01-00".into()).is_some());
+        assert!(validate_yyyy_mm_dd("2020-01-32".into()).is_some());
+    }
+
+    #[test]
+    fn validate_rfc3339_valid() {
+        assert!(validate_rfc3339("2020-12-15T00:00:00Z".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00z".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T12:45:22Z".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00+12:14".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00+00:00".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00-00:00".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00+12:14".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00-12:14".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00.12345Z".into()).is_none());
+        assert!(validate_rfc3339("2020-12-15T00:00:00.12345+12:14".into()).is_none());
+    }
 }

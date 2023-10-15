@@ -50,9 +50,7 @@ pub fn create_path(paths: &[impl ToString]) -> String {
             continue;
         }
         if has_param_yet {
-            if has_param_yet {
-                panic!("Cannot have a path with a slash after a parameter");
-            }
+            panic!("Cannot have a path with a slash after a parameter");
         }
         final_path.push('/');
         final_path.push_str(&str);
