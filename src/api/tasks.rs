@@ -332,13 +332,13 @@ fn validate_yyyy_mm_dd(date: String) -> Option<String> {
     if date[0..4].parse::<u16>().is_err() {
         return Some("invalid year".into());
     }
-    if date[5..7]
+    if !date[5..7]
         .parse::<u8>()
         .is_ok_and(|x| (1..=12).contains(&x))
     {
         return Some("invalid month".into());
     }
-    if date[8..10]
+    if !date[8..10]
         .parse::<u8>()
         .is_ok_and(|x| (1..=31).contains(&x))
     {
@@ -358,13 +358,13 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
     if t_or_space != 'T' && t_or_space != ' ' {
         return Some("missing T or space".into());
     }
-    if datetime[11..13].parse::<u8>().is_ok_and(|x| x <= 23) {
+    if !datetime[11..13].parse::<u8>().is_ok_and(|x| x <= 23) {
         return Some("invalid hour".into());
     }
-    if datetime[14..16].parse::<u8>().is_ok_and(|x| x <= 59) {
+    if !datetime[14..16].parse::<u8>().is_ok_and(|x| x <= 59) {
         return Some("invalid minute".into());
     }
-    if datetime[17..19].parse::<u8>().is_ok_and(|x| x <= 60) {
+    if !datetime[17..19].parse::<u8>().is_ok_and(|x| x <= 60) {
         return Some("invalid second".into());
     }
     let mut timezone_index = 19;
@@ -396,13 +396,13 @@ fn validate_rfc3339(datetime: String) -> Option<String> {
         }
         return None;
     }
-    if datetime[timezone_index + 1..timezone_index + 3]
+    if !datetime[timezone_index + 1..timezone_index + 3]
         .parse::<u8>()
         .is_ok_and(|x| x <= 23)
     {
         return Some("invalid timezone hour".into());
     }
-    if datetime[timezone_index + 4..timezone_index + 6]
+    if !datetime[timezone_index + 4..timezone_index + 6]
         .parse::<u8>()
         .is_ok_and(|x| x <= 59)
     {

@@ -100,25 +100,31 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Cannot have a path with a slash after a parameter")]
     fn invalid_path_with_slash_after_param_key() {
         create_path(&["/test", "test2=", "/test3"]);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Cannot have a path with a slash after a parameter")]
     fn invalid_path_with_slash_after_param_value() {
         create_path(&["/test", "test2=", "test4", "/test5"]);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Cannot have a path with a slash after a parameter")]
+    fn invalid_path_with_no_param_after_param() {
+        create_path(&["/test", "test2=", "test3", "test4"]);
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot have a path with a parameter key right after another parameter key (parameter value required)")]
     fn invalid_path_with_skipped_param_value() {
         create_path(&["/test", "test2=", "test3="]);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Cannot have a path with a parameter key at the end of the path (parameter value required)")]
     fn invalid_path_with_no_param_value() {
         create_path(&["/test", "test2="]);
     }
