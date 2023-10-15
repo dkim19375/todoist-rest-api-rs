@@ -18,5 +18,7 @@ jobs:
         run: export FMT_OUTPUT=$(cargo fmt --message-format short)
       - name: Print cargo fmt output
         run: echo $FMT_OUTPUT
+      - name: Test
+        run: echo $(expr length + "$(echo "$FMT_OUTPUT"|tr -d '\n')")
       - name: Check cargo fmt output
         run: if [ -z "$(echo "$FMT_OUTPUT"|tr -d '\n')" ]; then exit 1; fi
