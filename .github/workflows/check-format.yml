@@ -19,4 +19,4 @@ jobs:
       - name: Print cargo fmt output
         run: echo $FMT_OUTPUT
       - name: Check cargo fmt output
-        run: if [ -z $FMT_OUTPUT ]; then exit 1; fi
+        run: if [ -z "$(echo "$FMT_OUTPUT"|tr -d '\n')" ]; then exit 1; fi
